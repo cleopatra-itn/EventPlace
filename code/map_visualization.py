@@ -2,50 +2,116 @@
 # -*- coding: utf-8 -*-
 import json
 import re
-
 import pandas as pd
-
 import plotly.graph_objects as go
 
-event = "mock_plotting_data2"
-with open("%s.json" % event) as f:
+event = "mock"
+with open("resources/%s.json" % event) as f:
   data = json.load(f)
 
-def extract_plotting_data(data):
 
+def get_color(entity_type):
+    types_master = ["EthnicGroup", "Country", "Event", "Person"]
+    colors = ["darkorange", "cornflowerblue", "darkcyan", "plum"]
+
+    color_n = types_master.index(entity_type)
+    color = colors[color_n]
+    return(color)
+
+def get_entities_plotting_data(data):
+    # Get data for plotting each entity. 
+    # Entity types will be plotted in different colors.    
     locations = list(data.keys())
     latitudes = []
     longitudes = []
-    mentions = []
     entities = []
-    types = []
+    colors = []
 
     for location in locations:
-        latitudes.append(data[location]["longitude"])
-        longitudes.append(data[location]["latitude"])
-        mentions.append(data[location]["mentions"]*10)
-        entities.append(data[location]["entity"].keys())
-        types.append(data[location]["entity"].values())
+        entities_at_location = list(data[location]["entity"].keys())
+        entity_types_at_location = list(data[location]["entity"].values())
+
+        for e,t in zip(entities_at_location, entity_types_at_location):
+            entities.append(e)
+            regularizer = entities_at_location.index(e)*0.7
+            latitudes.append(data[location]["latitude"]+regularizer)
+            longitudes.append(data[location]["longitude"]+regularizer)
+            colors.append(get_color(t))
         
-    assert(len(latitudes) == len(longitudes) == len(mentions))
+    assert(len(latitudes) == len(longitudes) == len(entities) == len(colors))
 
-    return locations, latitudes, longitudes, mentions, entities, types
+    return latitudes, longitudes, entities, colors
 
-locations, latitudes, longitudes, mentions, entities, types = extract_plotting_data(data)
+def get_locations_plotting_data(data):
+    # Get data for plotting locations. 
+    # The marker size is determined by the number of entities with that location.    
+    locations = list(data.keys())
+    latitudes = []
+    longitudes = []
+    entities = []
+    mentions = []
 
-fig = go.Figure(go.Scattermapbox(
-    mode = "markers",
-    lon = longitudes,
-    lat = latitudes,
-    marker = {'size': mentions},
-))
+    for location in locations:
+        latitudes.append(data[location]["latitude"])
+        longitudes.append(data[location]["longitude"])
+        entities.append(", ".join(list(data[location]["entity"].keys())))
+        mentions.append(data[location]["mentions"]*10)
+        
+    assert(len(latitudes) == len(longitudes) == len(locations) == len(entities) == len(mentions))
 
-fig.update_layout(
-    margin ={"l":0,"t":0,"b":0,"r":0},
-    mapbox = {
-        "center": {"lon": 10, "lat": 10},
-        "style": "stamen-terrain",
-        "center": {"lon": -20, "lat": -20},
-        "zoom": 1})
+    return latitudes, longitudes, locations, entities, mentions
 
-fig.show()
+def plot_entities():
+    # Plot individual entities, with color per type
+    latitudes, longitudes, entities, colors = get_entities_plotting_data(data)
+
+    fig = go.Figure(go.Scattermapbox(
+        mode = "markers",
+        lon = longitudes,
+        lat = latitudes,
+        text = entities,
+        marker = go.scattermapbox.Marker(
+            color = colors,
+            size = 10
+        )
+    ))
+
+    fig.update_layout(
+        margin ={"l":0,"t":0,"b":0,"r":0},
+        mapbox = {
+            "center": {"lon": 10, "lat": 10},
+            "style": "stamen-terrain",
+            "center": {"lon": -20, "lat": -20},
+            "zoom": 1})
+
+    fig.show()
+
+def plot_locations():
+    # Plot locations, with mentions as marker size 
+    latitudes, longitudes, locations, entities, mentions = get_locations_plotting_data(data)
+    
+    fig = go.Figure(go.Scattermapbox(
+        mode = "markers",
+        lon = longitudes,
+        lat = latitudes,
+        text = entities,
+        marker = go.scattermapbox.Marker(
+            size = mentions
+        )
+    ))
+
+    fig.update_layout(
+        margin ={"l":0,"t":0,"b":0,"r":0},
+        mapbox = {
+            "center": {"lon": 10, "lat": 10},
+            "style": "stamen-terrain",
+            "center": {"lon": -20, "lat": -20},
+            "zoom": 1})
+
+    fig.show()
+
+# ----- Plot individual entities, with color per type
+#plot_entities()
+
+# ----- Plot locations, with mentions as marker size 
+plot_locations()
