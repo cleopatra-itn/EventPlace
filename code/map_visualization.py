@@ -26,7 +26,7 @@ class Visualize:
         
         # get visualization data for each month, and make visualization:
         for month in sorted(list(self.data.keys())): 
-            if month != "2014_08": continue
+            #if month != "2014_08": continue
             print(month)
             visualization_data = self._make_visualization_data(month)
             self._make_visualization(visualization_data)
@@ -37,6 +37,15 @@ class Visualize:
         color_n = types_master.index(entity_type)
         color = colors[color_n]
         return(color)
+
+    def _get_label(self, entities, location):
+        
+        entities = sorted([x for x in entities if x != location])
+        if len(entities) != 0:
+            label = location + " -- " + ", ".join(entities)
+        else:
+            label = location
+        return label
 
     def _check_entity_type(self, entity_type):
         type_mapping = {'resistance movement': 'conflict',
@@ -114,11 +123,11 @@ class Visualize:
                 visualization_data["latitudes"].append(lat)
                 visualization_data["longitudes"].append(lon)
                 visualization_data["frequency"].append(frequency)
-                visualization_data["locations"][location] = []
+                visualization_data["locations"][location] = set()
 
                 coordinates.add((lat, lon))
 
-            visualization_data["locations"][location].append(entity)
+            visualization_data["locations"][location].add(entity)
             indx = visualization_data["latitudes"].index(lat)
             visualization_data["frequency"][indx] += frequency
 
@@ -129,8 +138,7 @@ class Visualize:
 
         # make location label for visualization
         for location in visualization_data["locations"]:
-            label = location + " -- " + ", ".join([x for x in visualization_data["locations"][location] if x != location])
-            if label[-4:] == " -- ": label = label[:-4]
+            label = self._get_label(visualization_data["locations"][location], location)
             visualization_data["location_labels"].append(label) 
 
         assert(len(visualization_data["latitudes"]) == len(visualization_data["longitudes"]) == len(visualization_data["locations"]) == len(visualization_data["frequency"]))
