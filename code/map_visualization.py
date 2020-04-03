@@ -77,7 +77,7 @@ class Visualize:
     def _make_visualization_data(self, month):
 
         if self.focus == "locations":
-            visualization_data = self.locations_data(self.data[month])
+            return self.locations_data(self.data[month])
             
         if self.focus == "entities":
             return self.entities_data(self.data[month])
@@ -91,8 +91,35 @@ class Visualize:
         if self.focus == "entities":
             self.entities_visualization(visualization_data)
 
-    def locations_data(self):
-        visualization_data = dict()
+    def locations_data(self, month_data):
+        visualization_data = {"locations": [],
+                        "latitudes": [],
+                        "longitudes": [],
+                        "frequency": []
+                        }
+
+        entities_in_data = sorted(list(month_data.keys()))
+        for entity in entities_in_data:
+
+            lat = float(month_data[entity]["latitude"])
+            lon = float(month_data[entity]["longitude"])
+            location = month_data[entity]["location"]
+            frequency = month_data[entity]["frequency"]
+
+            if lat not in visualization_data["latitudes"]:
+                visualization_data["latitudes"].append(lat)
+                visualization_data["longitudes"].append(lon)
+                visualization_data["locations"].append(location)
+                visualization_data["frequency"].append(frequency)
+
+            indx = visualization_data["latitudes"].index(lat)
+            visualization_data["frequency"][indx] += frequency
+
+        for n,frequency in enumerate(visualization_data["frequency"]):
+            frequency += 8  
+            visualization_data["frequency"][n] = frequency
+
+        assert(len(visualization_data["latitudes"]) == len(visualization_data["longitudes"]) == len(visualization_data["locations"]) == len(visualization_data["frequency"]))
         return visualization_data
 
     def entities_data(self, month_data):
@@ -178,7 +205,7 @@ class Visualize:
 
         fig.show()
 
-    def location_visualization(self, visualization_data):
+    def locations_visualization(self, visualization_data):
 
         fig = go.Figure(go.Scattermapbox(
             mode = "markers",
@@ -202,29 +229,3 @@ class Visualize:
         fig.show()
 
 v = Visualize()
-
-# --------- for location based
-# def get_locations_plotting_data(data):
-#     # Get data for plotting locations. 
-#     # The marker size is determined by the number of entities with that location.    
-#     locations = list(data.keys())
-#     latitudes = []
-#     longitudes = []
-#     entities = []
-#     mentions = []
-
-#     for entity in data:
-#         latitudes.append(data[entity]["latitude"])
-#         longitudes.append(data[entity]["longitude"])
-#         entities.append(entity) #", ".join(list(data[location]["entity"].keys())))
-#         mentions.append(data[entity]["mentions"]*10)
-        
-#     assert(len(latitudes) == len(longitudes) == len(locations) == len(entities) == len(mentions))
-
-#     return latitudes, longitudes, locations, entities, mentions
-
-
-# def plot_locations(month_data):
-#     # Plot locations, with mentions as marker size 
-#     latitudes, longitudes, locations, entities, mentions = get_locations_plotting_data(month_data)
-    
