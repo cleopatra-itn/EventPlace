@@ -1,24 +1,30 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import json
-import random
-import re
+import argparse
 import pandas as pd
 import plotly.graph_objects as go
+import random
+import re
 
-language = "it"
-with open("resources/%s.json" % language) as f:
-  data = json.load(f)
+parser = argparse.ArgumentParser(description="Visualize entity locations in Wikipedia revision histories")
+parser.add_argument("language", help="two/three letter language code, e.g. 'nl'.")
+parser.add_argument("input_folder", default="arab_spring", help="folder with input data.")
+parser.add_argument("visualization_focus", default="entities", help="visualize focus can be 'entities' or 'location' based.")
+
+args = parser.parse_args()
 
 class Visualize:
 
-    def __init__(self, data, focus="entities"):
-        self.data = data
-        self.focus = focus
+    def __init__(self):
+        with open("resources/%s/%s.json" % (args.input_folder, args.language)) as f:
+            self.data = json.load(f)
+        self.focus = args.visualization_focus
         
         if self.focus == "entities":
             self.entitiesDB = dict() 
         
+        # get visualization data for each month, and make visualization:
         for month in sorted(list(self.data.keys())): 
             if month != "2014_08": continue
             print(month)
@@ -33,7 +39,6 @@ class Visualize:
         return(color)
 
     def _check_entity_type(self, entity_type):
-        # todo: double check this
         type_mapping = {'resistance movement': 'conflict',
                         'civil resistance': 'conflict',
                         'civil disobedience': 'conflict',
@@ -47,7 +52,7 @@ class Visualize:
                         'geographical region': 'geographic region',
                         'district of libya': 'geographic region',
                         'province': 'geographic region',
-                        'website': 'organization', # e.g. Twitter, Facebook
+                        'website': 'organization',
                         'organisation': 'organization',
                         'nonprofit organization': 'organization',
                         'terrorist organisation': 'organization',
@@ -196,7 +201,7 @@ class Visualize:
 
         fig.show()
 
-v = Visualize(data, focus="entities")
+v = Visualize()
 
 # --------- for location based
 # def get_locations_plotting_data(data):
