@@ -1,40 +1,33 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import json
-import argparse
 import pandas as pd
 import plotly.graph_objects as go
 import random
 import re
 
-parser = argparse.ArgumentParser(description="Visualize entity locations in Wikipedia revision histories")
-parser.add_argument("language", help="two/three letter language code, e.g. 'nl'.")
-parser.add_argument("input_folder", default="arab_spring", help="folder with input data.")
-parser.add_argument("visualization_focus", default="entities", help="visualize focus can be 'entities' or 'location' based.")
-
-args = parser.parse_args()
-
 class Visualize:
 
-    def __init__(self):
-        with open("resources/%s/%s.json" % (args.input_folder, args.language)) as f:
+    def __init__(self, input_folder, language, visualization_focus, show=False):
+        with open("resources/%s/%s.json" % (input_folder, language)) as f:
             self.data = json.load(f)
-        self.focus = args.visualization_focus
+        self.focus = visualization_focus
+        self.visualization_data = dict()
         
         if self.focus == "entities":
+            self.types = ['city', 'conflict', 'country', 'ethnic group', 'geographic region', 'human', 'organization', 'referendum', 'religion', 'resolution', 'social movement', 'square']
             self.entitiesDB = dict() 
         
-        # get visualization data for each month, and make visualization:
         for month in sorted(list(self.data.keys())): 
             #if month != "2014_08": continue
-            print(month)
             visualization_data = self._make_visualization_data(month)
-            self._make_visualization(visualization_data)
+            self.visualization_data[month] = visualization_data
+            if show == True:
+                self._make_visualization(visualization_data)
 
     def _get_color(self, entity_type): 
-        types_master = ['city', 'conflict', 'country', 'ethnic group', 'geographic region', 'human', 'organization', 'referendum', 'religion', 'resolution', 'social movement', 'square']
-        colors = [i for i in range(len(types_master))] 
-        color_n = types_master.index(entity_type)
+        colors = [i for i in range(len(self.types))] 
+        color_n = self.types.index(entity_type)
         color = colors[color_n]
         return(color)
 
@@ -106,7 +99,7 @@ class Visualize:
                         "location_labels": [],
                         "latitudes": [],
                         "longitudes": [],
-                        "frequency": []
+                        "frequencies": []
                         }
 
         entities_in_data = sorted(list(month_data.keys()))
@@ -117,24 +110,24 @@ class Visualize:
             lat = float(month_data[entity]["latitude"])
             lon = float(month_data[entity]["longitude"])
             location = month_data[entity]["location"]
-            frequency = month_data[entity]["frequency"]
+            frequency = month_data[entity]["frequencies"]
 
             if (lat, lon) not in coordinates:
                 visualization_data["latitudes"].append(lat)
                 visualization_data["longitudes"].append(lon)
-                visualization_data["frequency"].append(frequency)
+                visualization_data["frequencies"].append(frequency)
                 visualization_data["locations"][location] = set()
 
                 coordinates.add((lat, lon))
 
             visualization_data["locations"][location].add(entity)
             indx = visualization_data["latitudes"].index(lat)
-            visualization_data["frequency"][indx] += frequency
+            visualization_data["frequencies"][indx] += frequency
 
         # increase marker size
-        for n,frequency in enumerate(visualization_data["frequency"]):
+        for n,frequency in enumerate(visualization_data["frequencies"]):
             frequency += 8  
-            visualization_data["frequency"][n] = frequency
+            visualization_data["frequencies"][n] = frequency
 
         # make location label for visualization
         for location in visualization_data["locations"]:
@@ -145,7 +138,7 @@ class Visualize:
             len(visualization_data["latitudes"]) == 
             len(visualization_data["longitudes"]) == 
             len(visualization_data["locations"]) == 
-            len(visualization_data["frequency"])
+            len(visualization_data["frequencies"])
             )
         return visualization_data
 
@@ -155,7 +148,7 @@ class Visualize:
                         "latitudes": [],
                         "longitudes": [],
                         "entity_types": [],
-                        "frequency": [],
+                        "frequencies": [],
                         "colors": []
                         }
 
@@ -200,13 +193,13 @@ class Visualize:
             visualization_data["entities"].append(entity)
             visualization_data["latitudes"].append(visualization_lat)
             visualization_data["longitudes"].append(visualization_lon)
-            visualization_data["frequency"].append(month_data[entity]["frequency"]*8)
+            visualization_data["frequencies"].append(month_data[entity]["frequency"]*8)
 
             entity_type = self._check_entity_type(month_data[entity]["type"].lower())
             visualization_data["entity_types"].append(entity_type)
             visualization_data["colors"].append(self._get_color(entity_type))
 
-        assert(len(visualization_data["latitudes"]) == len(visualization_data["longitudes"]) == len(visualization_data["entities"]) == len(visualization_data["colors"]) == len(visualization_data["frequency"]))
+        assert(len(visualization_data["latitudes"]) == len(visualization_data["longitudes"]) == len(visualization_data["entities"]) == len(visualization_data["colors"]) == len(visualization_data["frequencies"]))
         return visualization_data
 
     def entities_visualization(self, visualization_data):
@@ -218,7 +211,7 @@ class Visualize:
             text = visualization_data["entities"],
             marker = go.scattermapbox.Marker(
                 color = visualization_data["colors"],
-                size = visualization_data["frequency"]
+                size = visualization_data["frequencies"]
             )
         ))
 
@@ -240,7 +233,7 @@ class Visualize:
             lat = visualization_data["latitudes"],
             text = visualization_data["location_labels"],
             marker = go.scattermapbox.Marker(
-                size = visualization_data["frequency"]
+                size = visualization_data["frequencies"]
             )
         ))
 
@@ -254,5 +247,3 @@ class Visualize:
         )
 
         fig.show()
-
-Visualize()
