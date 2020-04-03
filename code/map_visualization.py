@@ -92,7 +92,7 @@ class Visualize:
             self.entities_visualization(visualization_data)
 
     def locations_data(self, month_data):
-        visualization_data = {"locations": [],
+        visualization_data = {"locations": dict(),
                         "latitudes": [],
                         "longitudes": [],
                         "frequency": []
@@ -109,7 +109,7 @@ class Visualize:
             if lat not in visualization_data["latitudes"]:
                 visualization_data["latitudes"].append(lat)
                 visualization_data["longitudes"].append(lon)
-                visualization_data["locations"].append(location)
+                visualization_data["locations"][location].append(entity)
                 visualization_data["frequency"].append(frequency)
 
             indx = visualization_data["latitudes"].index(lat)
@@ -228,4 +228,4 @@ class Visualize:
 
         fig.show()
 
-v = Visualize()
+Visualize()
