@@ -92,13 +92,17 @@ class Visualize:
             self.entities_visualization(visualization_data)
 
     def locations_data(self, month_data):
+
         visualization_data = {"locations": dict(),
+                        "location_labels": [],
                         "latitudes": [],
                         "longitudes": [],
                         "frequency": []
                         }
 
         entities_in_data = sorted(list(month_data.keys()))
+
+        coordinates = set()
         for entity in entities_in_data:
 
             lat = float(month_data[entity]["latitude"])
@@ -106,18 +110,28 @@ class Visualize:
             location = month_data[entity]["location"]
             frequency = month_data[entity]["frequency"]
 
-            if lat not in visualization_data["latitudes"]:
+            if (lat, lon) not in coordinates:
                 visualization_data["latitudes"].append(lat)
                 visualization_data["longitudes"].append(lon)
-                visualization_data["locations"][location].append(entity)
                 visualization_data["frequency"].append(frequency)
+                visualization_data["locations"][location] = []
 
+                coordinates.add((lat, lon))
+
+            visualization_data["locations"][location].append(entity)
             indx = visualization_data["latitudes"].index(lat)
             visualization_data["frequency"][indx] += frequency
 
+        # increase marker size
         for n,frequency in enumerate(visualization_data["frequency"]):
             frequency += 8  
             visualization_data["frequency"][n] = frequency
+
+        # make location label for visualization
+        for location in visualization_data["locations"]:
+            label = location + " -- " + ", ".join([x for x in visualization_data["locations"][location] if x != location])
+            if label[-4:] == " -- ": label = label[:-4]
+            visualization_data["location_labels"].append(label) 
 
         assert(len(visualization_data["latitudes"]) == len(visualization_data["longitudes"]) == len(visualization_data["locations"]) == len(visualization_data["frequency"]))
         return visualization_data
@@ -211,7 +225,7 @@ class Visualize:
             mode = "markers",
             lon = visualization_data["longitudes"],
             lat = visualization_data["latitudes"],
-            text = visualization_data["locations"],
+            text = visualization_data["location_labels"],
             marker = go.scattermapbox.Marker(
                 size = visualization_data["frequency"]
             )
