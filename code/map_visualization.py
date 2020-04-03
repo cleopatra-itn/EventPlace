@@ -1,117 +1,225 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import json
+import random
 import re
 import pandas as pd
 import plotly.graph_objects as go
 
-event = "mock"
-with open("resources/%s.json" % event) as f:
+language = "it"
+with open("resources/%s.json" % language) as f:
   data = json.load(f)
 
+class Visualize:
 
-def get_color(entity_type):
-    types_master = ["EthnicGroup", "Country", "Event", "Person"]
-    colors = ["darkorange", "cornflowerblue", "darkcyan", "plum"]
-
-    color_n = types_master.index(entity_type)
-    color = colors[color_n]
-    return(color)
-
-def get_entities_plotting_data(data):
-    # Get data for plotting each entity. 
-    # Entity types will be plotted in different colors.    
-    locations = list(data.keys())
-    latitudes = []
-    longitudes = []
-    entities = []
-    colors = []
-
-    for location in locations:
-        entities_at_location = list(data[location]["entity"].keys())
-        entity_types_at_location = list(data[location]["entity"].values())
-
-        for e,t in zip(entities_at_location, entity_types_at_location):
-            entities.append(e)
-            regularizer = entities_at_location.index(e)*0.7
-            latitudes.append(data[location]["latitude"]+regularizer)
-            longitudes.append(data[location]["longitude"]+regularizer)
-            colors.append(get_color(t))
+    def __init__(self, data, focus="entities"):
+        self.data = data
+        self.focus = focus
         
-    assert(len(latitudes) == len(longitudes) == len(entities) == len(colors))
-
-    return latitudes, longitudes, entities, colors
-
-def get_locations_plotting_data(data):
-    # Get data for plotting locations. 
-    # The marker size is determined by the number of entities with that location.    
-    locations = list(data.keys())
-    latitudes = []
-    longitudes = []
-    entities = []
-    mentions = []
-
-    for location in locations:
-        latitudes.append(data[location]["latitude"])
-        longitudes.append(data[location]["longitude"])
-        entities.append(", ".join(list(data[location]["entity"].keys())))
-        mentions.append(data[location]["mentions"]*10)
+        if self.focus == "entities":
+            self.entitiesDB = dict() 
         
-    assert(len(latitudes) == len(longitudes) == len(locations) == len(entities) == len(mentions))
+        for month in sorted(list(self.data.keys())): 
+            if month != "2014_08": continue
+            print(month)
+            visualization_data = self._make_visualization_data(month)
+            self._make_visualization(visualization_data)
 
-    return latitudes, longitudes, locations, entities, mentions
+    def _get_color(self, entity_type): 
+        types_master = ['city', 'conflict', 'country', 'ethnic group', 'geographic region', 'human', 'organization', 'referendum', 'religion', 'resolution', 'social movement', 'square']
+        colors = [i for i in range(len(types_master))] 
+        color_n = types_master.index(entity_type)
+        color = colors[color_n]
+        return(color)
 
-def plot_entities():
-    # Plot individual entities, with color per type
-    latitudes, longitudes, entities, colors = get_entities_plotting_data(data)
+    def _check_entity_type(self, entity_type):
+        # todo: double check this
+        type_mapping = {'resistance movement': 'conflict',
+                        'civil resistance': 'conflict',
+                        'civil disobedience': 'conflict',
+                        'protest': 'conflict',
+                        'war': 'conflict',
+                        'continent': 'geographic region',
+                        'county': 'geographic region',
+                        'occupied territory': 'geographic region',
+                        'geographic location': 'geographic region',
+                        'geographic object': 'geographic region',
+                        'geographical region': 'geographic region',
+                        'district of libya': 'geographic region',
+                        'province': 'geographic region',
+                        'website': 'organization', # e.g. Twitter, Facebook
+                        'organisation': 'organization',
+                        'nonprofit organization': 'organization',
+                        'terrorist organisation': 'organization',
+                        'terrorrst organisation': 'organization',
+                        'political party': 'organization',
+                        'political union': 'organization',
+                        'government agency': 'organization',
+                        'islamic denomination': 'religion', #
+                        'united nations security council resolution': 'resolution'}
+        
+        if entity_type in list(type_mapping.keys()):
+            return type_mapping[entity_type]
+        else:
+            return entity_type
 
-    fig = go.Figure(go.Scattermapbox(
-        mode = "markers",
-        lon = longitudes,
-        lat = latitudes,
-        text = entities,
-        marker = go.scattermapbox.Marker(
-            color = colors,
-            size = 10
+    def _check_same_location(self, lat, lon, stored_entity_info):
+        return (   
+            lat == stored_entity_info["latitude"] and 
+            lon == stored_entity_info["longitude"]
         )
-    ))
 
-    fig.update_layout(
-        margin ={"l":0,"t":0,"b":0,"r":0},
-        mapbox = {
-            "center": {"lon": 10, "lat": 10},
-            "style": "stamen-terrain",
-            "center": {"lon": -20, "lat": -20},
-            "zoom": 1})
+    def _make_visualization_data(self, month):
 
-    fig.show()
+        if self.focus == "locations":
+            visualization_data = self.locations_data(self.data[month])
+            
+        if self.focus == "entities":
+            return self.entities_data(self.data[month])
 
-def plot_locations():
-    # Plot locations, with mentions as marker size 
-    latitudes, longitudes, locations, entities, mentions = get_locations_plotting_data(data)
+    def _make_visualization(self, visualization_data):
+        # todo: add title and legend
+
+        if self.focus == "locations":
+            self.locations_visualization(visualization_data)
+            
+        if self.focus == "entities":
+            self.entities_visualization(visualization_data)
+
+    def locations_data(self):
+        visualization_data = dict()
+        return visualization_data
+
+    def entities_data(self, month_data):
+
+        visualization_data = {"entities": [],
+                        "latitudes": [],
+                        "longitudes": [],
+                        "entity_types": [],
+                        "frequency": [],
+                        "colors": []
+                        }
+
+        coordinates = set()
+
+        entities_in_data = sorted(list(month_data.keys()))
+        for entity in entities_in_data:
+
+            lat = float(month_data[entity]["latitude"])
+            lon = float(month_data[entity]["longitude"])
+            
+            # check if entity has been used in previous months with same location:
+            if entity in self.entitiesDB.keys():
+
+                if self._check_same_location(lat, lon, self.entitiesDB[entity]):
+                    visualization_lat = self.entitiesDB[entity]["visualization_latitude"]
+                    visualization_lon = self.entitiesDB[entity]["visualization_longitude"]
+
+                    coordinates.add((lat, lon))
+                else: 
+                    print("%s has a new location!" % entity) 
+
+            # check if the location has already been used in this month: 
+            else:
+                
+                if (lat, lon) in coordinates:
+                    smoothing = random.uniform(-2, 2)
+                    visualization_lat = lat+smoothing
+                    visualization_lon = lon-smoothing
+
+                else:
+                    visualization_lat = lat
+                    visualization_lon = lon
+                    coordinates.add((lat, lon))
+
+                self.entitiesDB[entity] = {}
+                self.entitiesDB[entity]["latitude"] = lat
+                self.entitiesDB[entity]["longitude"] = lon
+                self.entitiesDB[entity]["visualization_latitude"] = visualization_lat
+                self.entitiesDB[entity]["visualization_longitude"] = visualization_lon
+
+            visualization_data["entities"].append(entity)
+            visualization_data["latitudes"].append(visualization_lat)
+            visualization_data["longitudes"].append(visualization_lon)
+            visualization_data["frequency"].append(month_data[entity]["frequency"]*8)
+
+            entity_type = self._check_entity_type(month_data[entity]["type"].lower())
+            visualization_data["entity_types"].append(entity_type)
+            visualization_data["colors"].append(self._get_color(entity_type))
+
+        assert(len(visualization_data["latitudes"]) == len(visualization_data["longitudes"]) == len(visualization_data["entities"]) == len(visualization_data["colors"]) == len(visualization_data["frequency"]))
+        return visualization_data
+
+    def entities_visualization(self, visualization_data):
+
+        fig = go.Figure(go.Scattermapbox(
+            mode = "markers",
+            lon = visualization_data["longitudes"],
+            lat = visualization_data["latitudes"],
+            text = visualization_data["entities"],
+            marker = go.scattermapbox.Marker(
+                color = visualization_data["colors"],
+                size = visualization_data["frequency"]
+            )
+        ))
+
+        fig.update_layout(
+            margin ={"l":0,"t":0,"b":0,"r":0},
+            mapbox = {
+                "center": {"lon": 10, "lat": 10},
+                "style": "stamen-terrain",
+                "center": {"lon": -20, "lat": -20},
+                "zoom": 1})
+
+        fig.show()
+
+    def location_visualization(self, visualization_data):
+
+        fig = go.Figure(go.Scattermapbox(
+            mode = "markers",
+            lon = visualization_data["longitudes"],
+            lat = visualization_data["latitudes"],
+            text = visualization_data["locations"],
+            marker = go.scattermapbox.Marker(
+                size = visualization_data["frequency"]
+            )
+        ))
+
+        fig.update_layout(
+            margin ={"l":0,"t":0,"b":0,"r":0},
+            mapbox = {
+                "center": {"lon": 10, "lat": 10},
+                "style": "stamen-terrain",
+                "center": {"lon": -20, "lat": -20},
+                "zoom": 1}
+        )
+
+        fig.show()
+
+v = Visualize(data, focus="entities")
+
+# --------- for location based
+# def get_locations_plotting_data(data):
+#     # Get data for plotting locations. 
+#     # The marker size is determined by the number of entities with that location.    
+#     locations = list(data.keys())
+#     latitudes = []
+#     longitudes = []
+#     entities = []
+#     mentions = []
+
+#     for entity in data:
+#         latitudes.append(data[entity]["latitude"])
+#         longitudes.append(data[entity]["longitude"])
+#         entities.append(entity) #", ".join(list(data[location]["entity"].keys())))
+#         mentions.append(data[entity]["mentions"]*10)
+        
+#     assert(len(latitudes) == len(longitudes) == len(locations) == len(entities) == len(mentions))
+
+#     return latitudes, longitudes, locations, entities, mentions
+
+
+# def plot_locations(month_data):
+#     # Plot locations, with mentions as marker size 
+#     latitudes, longitudes, locations, entities, mentions = get_locations_plotting_data(month_data)
     
-    fig = go.Figure(go.Scattermapbox(
-        mode = "markers",
-        lon = longitudes,
-        lat = latitudes,
-        text = entities,
-        marker = go.scattermapbox.Marker(
-            size = mentions
-        )
-    ))
-
-    fig.update_layout(
-        margin ={"l":0,"t":0,"b":0,"r":0},
-        mapbox = {
-            "center": {"lon": 10, "lat": 10},
-            "style": "stamen-terrain",
-            "center": {"lon": -20, "lat": -20},
-            "zoom": 1})
-
-    fig.show()
-
-# ----- Plot individual entities, with color per type
-#plot_entities()
-
-# ----- Plot locations, with mentions as marker size 
-plot_locations()
