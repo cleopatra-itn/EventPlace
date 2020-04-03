@@ -141,7 +141,12 @@ class Visualize:
             label = self._get_label(visualization_data["locations"][location], location)
             visualization_data["location_labels"].append(label) 
 
-        assert(len(visualization_data["latitudes"]) == len(visualization_data["longitudes"]) == len(visualization_data["locations"]) == len(visualization_data["frequency"]))
+        assert(
+            len(visualization_data["latitudes"]) == 
+            len(visualization_data["longitudes"]) == 
+            len(visualization_data["locations"]) == 
+            len(visualization_data["frequency"])
+            )
         return visualization_data
 
     def entities_data(self, month_data):
