@@ -3,27 +3,36 @@
 import json
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.io as pio
 import random
 import re
 
 class Visualize:
 
     def __init__(self, input_folder, language, visualization_focus, show=False):
-        with open("resources/%s/%s.json" % (input_folder, language)) as f:
-            self.data = json.load(f)
+        self.input_folder = input_folder
+        self.language = language
         self.focus = visualization_focus
-        self.visualization_data = dict()
-        
+
         if self.focus == "entities":
-            self.types = ['city', 'conflict', 'country', 'ethnic group', 'geographic region', 'human', 'organization', 'referendum', 'religion', 'resolution', 'social movement', 'square']
+            self.types = [
+                'city', 'conflict', 'country', 'ethnic group', 'geographic region', 'human', 
+                'organization', 'referendum', 'religion', 'resolution', 'social movement', 'square'
+            ]
             self.entitiesDB = dict() 
+
+        with open("resources/%s/%s.json" % (self.input_folder, self.language)) as f:
+            self.input_data = json.load(f)
         
-        for month in sorted(list(self.data.keys())): 
+        self.visualization_data = dict()
+        for month in sorted(list(self.input_data.keys())): 
             #if month != "2014_08": continue
-            visualization_data = self._make_visualization_data(month)
-            self.visualization_data[month] = visualization_data
+            month_visualization_data = self._make_visualization_data(month)
+            self.visualization_data[month] = month_visualization_data
+            self.fig = self._make_visualization(month_visualization_data, show=show)
+                
             if show == True:
-                self._make_visualization(visualization_data)
+                fig.show()
 
     def _get_color(self, entity_type): 
         colors = [i for i in range(len(self.types))] 
@@ -62,7 +71,7 @@ class Visualize:
                         'political party': 'organization',
                         'political union': 'organization',
                         'government agency': 'organization',
-                        'islamic denomination': 'religion', #
+                        'islamic denomination': 'religion',
                         'united nations security council resolution': 'resolution'}
         
         if entity_type in list(type_mapping.keys()):
@@ -79,20 +88,25 @@ class Visualize:
     def _make_visualization_data(self, month):
 
         if self.focus == "locations":
-            return self.locations_data(self.data[month])
+            return self.locations_data(self.input_data[month])
             
         if self.focus == "entities":
-            return self.entities_data(self.data[month])
+            return self.entities_data(self.input_data[month])
 
-    def _make_visualization(self, visualization_data):
+    def _make_visualization(self, visualization_data, show):
         # todo: add title and legend
 
         if self.focus == "locations":
-            self.locations_visualization(visualization_data)
+            fig = self.locations_visualization(visualization_data)
             
         if self.focus == "entities":
-            self.entities_visualization(visualization_data)
-
+            fig = self.entities_visualization(visualization_data)
+        return fig
+        
+        # if show == True:
+        #     fig.show()
+        # else:
+        
     def locations_data(self, month_data):
 
         visualization_data = {"locations": dict(),
@@ -216,15 +230,15 @@ class Visualize:
         ))
 
         fig.update_layout(
-            margin ={"l":0,"t":0,"b":0,"r":0},
+            margin = {"l":0,"t":0,"b":0,"r":0},
             mapbox = {
                 "center": {"lon": 10, "lat": 10},
                 "style": "stamen-terrain",
                 "center": {"lon": -20, "lat": -20},
-                "zoom": 1})
-
-        fig.show()
-
+                "zoom": 1}
+        )
+        return fig
+        
     def locations_visualization(self, visualization_data):
 
         fig = go.Figure(go.Scattermapbox(
@@ -238,12 +252,11 @@ class Visualize:
         ))
 
         fig.update_layout(
-            margin ={"l":0,"t":0,"b":0,"r":0},
+            margin = {"l":0,"t":0,"b":0,"r":0},
             mapbox = {
                 "center": {"lon": 10, "lat": 10},
                 "style": "stamen-terrain",
                 "center": {"lon": -20, "lat": -20},
                 "zoom": 1}
         )
-
-        fig.show()
+        return fig
