@@ -9,10 +9,10 @@ import re
 
 class Visualize:
 
-    def __init__(self, input_folder, language, visualization_focus, visualize_month=False, show=False):
-        self.input_folder = input_folder
+    def __init__(self, event, language, method, visualize_month=False, show=False):
+        self.event = event
         self.language = language
-        self.focus = visualization_focus
+        self.focus = method
 
         if self.focus == "entities":
             self.types = [
@@ -21,7 +21,7 @@ class Visualize:
             ]
             self.entitiesDB = dict() 
 
-        with open("resources/%s/%s.json" % (self.input_folder, self.language)) as f:
+        with open("resources/%s/%s.json" % (self.event, self.language)) as f:
             self.input_data = json.load(f)
         
         self.data = dict()

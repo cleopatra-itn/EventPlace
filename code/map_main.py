@@ -1,18 +1,99 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import argparse
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
 import map_visualization as mv
 import map_timelapse as mt
+import pandas as pd
 
-parser = argparse.ArgumentParser(description="Visualize entity locations in Wikipedia revision histories")
-parser.add_argument("input_folder", default="arab_spring", help="folder with input data.")
-parser.add_argument("language", default="nl", help="two/three letter language code, e.g. 'nl'.")
-parser.add_argument("visualization_focus", default="entities", help="visualize focus can be 'entities' or 'location' based.")
-parser.add_argument("visualization_type", default="visualization", help="visualizatioin or timelapse.")
+from dash.dependencies import Input, Output
 
-args = parser.parse_args()
+# parser = argparse.ArgumentParser(description="Visualize entity locations in Wikipedia revision histories")
+# parser.add_argument("input_folder", default="arab_spring", help="folder with input data.")
+# parser.add_argument("language", default="nl", help="two/three letter language code, e.g. 'nl'.")
+# parser.add_argument("visualization_focus", default="entities", help="visualize focus can be 'entities' or 'location' based.")
+# parser.add_argument("visualization_type", default="single_month", help="visualizatioin or timelapse.")
 
-if args.visualization_type == "visualization":
-	v = mv.Visualize(args.input_folder, args.language, args.visualization_focus, "2014_08", show=True)
-else:
-	v = mt.Timelapse(args.input_folder, args.language, args.visualization_focus, show=True)
+# args = parser.parse_args()
+
+def get_figure(event, language, method, duration):
+	print("event", event, "language", language, "method", method)
+	if duration == "single_month":
+		return mv.Visualize(event, language, method, "2014_08", show=False).fig
+	else:
+		return mt.Timelapse(event, language, method, show=False).fig
+
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+introduction = '''
+### EventPlace map visualizations
+
+Use the options to create animations of the development of a Wikipedia page.
+'''
+    
+app.layout = html.Div([
+
+	dcc.Markdown(children=introduction), 
+
+	html.Div([
+    	dcc.Dropdown(
+    		id = "event",
+        	options = [
+	            {'label': 'Arab Spring', 'value': 'arab_spring'},
+	            {'label': 'Refugee Crisis', 'value': 'refugee_crisis'},
+	            {'label': 'COVID-19', 'value': 'covid19'}
+	        ],
+	        value = 'arab_spring'
+		),
+		dcc.RadioItems(
+        	id = "method",
+	        options = [
+	            {'label': 'Entity based', 'value': 'entities'},
+	            {'label': 'Location based', 'value': 'location'}
+	        ],
+	        value = 'entities'
+	    )
+    ], style={'width': '48%', 'display': 'inline-block'}),
+
+    html.Div([
+        dcc.Dropdown(
+        	id = "language",
+	        options = [
+	            {'label': 'Dutch', 'value': 'nl'},
+	            {'label': 'Italian', 'value': 'it'},
+	            {'label': 'German', 'value': 'de'}
+	        ],
+	        value = 'nl'
+	    ),
+	    dcc.RadioItems(
+        	id = "duration",
+	        options = [
+	            {'label': 'Month', 'value': 'single_month'},
+	            {'label': 'Timelapse', 'value': 'timelapse'}
+	        ],
+	        value = 'timelapse'
+	    )
+    ],style={'width': '48%', 'float': 'right', 'display': 'inline-block'}),
+
+    html.Div([
+        
+    ]),
+	
+	dcc.Graph(id = "visualization")
+])
+	
+@app.callback(
+    Output('visualization', 'figure'),
+    [Input('event', 'value'),
+     Input('language', 'value'),
+     Input('method', 'value'),
+     Input('duration', 'value')])
+
+def update_graph(event, language, method, duration):
+	return get_figure(event, language, method, duration)
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
