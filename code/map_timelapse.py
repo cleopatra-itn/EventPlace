@@ -9,34 +9,37 @@ entity_types = v.types
 months = list(visualization_data.keys())
 start_month = months[0]
 
-def get_monthly_type_split_data():
-    # split the data this way:
-    # each month has a dictionary, where each key is a type (e.g. "Country") with its corresponding entities (e.g. "Iraq")
-    # this is needed for the animation visualization. 
 
-    month_types_dict = {}
-    for month in months:
-        month_dict = {}
-        for entity_type in entity_types:
-            type_dict = {  
-                "entities": [],
-                "latitudes": [],
-                "longitudes": [],
-                "frequencies": []
-            }
-            if entity_type in visualization_data[month]["entity_types"]:
-                indices = [i for i, x in enumerate(visualization_data[month]["entity_types"]) if x == entity_type]
-                for indx in indices:
-                
-                    type_dict["entities"].append(visualization_data[month]["entities"][indx])
-                    type_dict["latitudes"].append(visualization_data[month]["latitudes"][indx])
-                    type_dict["longitudes"].append(visualization_data[month]["longitudes"][indx])
-                    type_dict["frequencies"].append(visualization_data[month]["frequencies"][indx])
+class Timelapse:
+ 
+    def get_monthly_type_split_data():
+        # split the data this way:
+        # each month has a dictionary, where each key is a type (e.g. "Country") with its corresponding entities (e.g. "Iraq")
+        # this is needed for the animation visualization. 
 
-            if len(type_dict["entities"]) < 1: continue
-            month_dict[entity_type] = type_dict
-        month_types_dict[month] = month_dict
-    return month_types_dict
+        month_types_dict = {}
+        for month in months:
+            month_dict = {}
+            for entity_type in entity_types:
+                type_dict = {  
+                    "entities": [],
+                    "latitudes": [],
+                    "longitudes": [],
+                    "frequencies": []
+                }
+                if entity_type in visualization_data[month]["entity_types"]:
+                    indices = [i for i, x in enumerate(visualization_data[month]["entity_types"]) if x == entity_type]
+                    for indx in indices:
+                    
+                        type_dict["entities"].append(visualization_data[month]["entities"][indx])
+                        type_dict["latitudes"].append(visualization_data[month]["latitudes"][indx])
+                        type_dict["longitudes"].append(visualization_data[month]["longitudes"][indx])
+                        type_dict["frequencies"].append(visualization_data[month]["frequencies"][indx])
+
+                if len(type_dict["entities"]) < 1: continue
+                month_dict[entity_type] = type_dict
+            month_types_dict[month] = month_dict
+        return month_types_dict
 
 def setup_fig_slider_dicts():
     fig_dict = {
@@ -145,7 +148,6 @@ def make_frames():
         	"label": month,
         	"method": "animate"}
         sliders_dict["steps"].append(slider_step)
-
 
 def update_fig_dict():
     fig_dict["layout"]["sliders"] = [sliders_dict]
