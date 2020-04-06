@@ -9,7 +9,7 @@ import re
 
 class Visualize:
 
-    def __init__(self, input_folder, language, visualization_focus, show=False):
+    def __init__(self, input_folder, language, visualization_focus, visualize_month=False, show=False):
         self.input_folder = input_folder
         self.language = language
         self.focus = visualization_focus
@@ -24,15 +24,16 @@ class Visualize:
         with open("resources/%s/%s.json" % (self.input_folder, self.language)) as f:
             self.input_data = json.load(f)
         
-        self.visualization_data = dict()
+        self.data = dict()
         for month in sorted(list(self.input_data.keys())): 
-            #if month != "2014_08": continue
-            month_visualization_data = self._make_visualization_data(month)
-            self.visualization_data[month] = month_visualization_data
-            self.fig = self._make_visualization(month_visualization_data, show=show)
+            if visualize_month:
+                if month != visualize_month: continue
+            visualization_data = self._make_visualization_data(month)
+            self.data[month] = visualization_data
+            self.fig = self._make_visualization(visualization_data, show=show)
                 
             if show == True:
-                fig.show()
+                self.fig.show()
 
     def _get_color(self, entity_type): 
         colors = [i for i in range(len(self.types))] 
@@ -94,18 +95,12 @@ class Visualize:
             return self.entities_data(self.input_data[month])
 
     def _make_visualization(self, visualization_data, show):
-        # todo: add title and legend
 
         if self.focus == "locations":
-            fig = self.locations_visualization(visualization_data)
+            return self.locations_visualization(visualization_data)
             
         if self.focus == "entities":
-            fig = self.entities_visualization(visualization_data)
-        return fig
-        
-        # if show == True:
-        #     fig.show()
-        # else:
+            return self.entities_visualization(visualization_data)
         
     def locations_data(self, month_data):
 
@@ -213,7 +208,13 @@ class Visualize:
             visualization_data["entity_types"].append(entity_type)
             visualization_data["colors"].append(self._get_color(entity_type))
 
-        assert(len(visualization_data["latitudes"]) == len(visualization_data["longitudes"]) == len(visualization_data["entities"]) == len(visualization_data["colors"]) == len(visualization_data["frequencies"]))
+        assert(
+            len(visualization_data["latitudes"]) == 
+            len(visualization_data["longitudes"]) == 
+            len(visualization_data["entities"]) == 
+            len(visualization_data["colors"]) == 
+            len(visualization_data["frequencies"])
+        )
         return visualization_data
 
     def entities_visualization(self, visualization_data):
