@@ -4,8 +4,8 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import code.map_visualization as mv
-import code.map_timelapse as mt
+import map_code.map_visualization as mv
+import map_code.map_timelapse as mt
 import os
 import pandas as pd
 
