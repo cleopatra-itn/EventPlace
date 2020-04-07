@@ -1,4 +1,4 @@
-import map_visualization as mv
+import map_code.map_visualization as mv
 import pandas as pd
 import plotly.graph_objects as go
 
