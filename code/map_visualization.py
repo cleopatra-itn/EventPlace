@@ -63,7 +63,7 @@ class Visualize:
                         'geographical region': 'geographic region',
                         'district of libya': 'geographic region',
                         'province': 'geographic region',
-                        'website': 'organization',
+                        'website': 'organization', # Twitter, Facebook
                         'organisation': 'organization',
                         'nonprofit organization': 'organization',
                         'terrorist organisation': 'organization',

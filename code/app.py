@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import map_visualization as mv
 import map_timelapse as mt
+import os
 import pandas as pd
 
 from dash.dependencies import Input, Output
