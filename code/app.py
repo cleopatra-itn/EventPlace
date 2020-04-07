@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import argparse
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -9,14 +8,6 @@ import map_timelapse as mt
 import pandas as pd
 
 from dash.dependencies import Input, Output
-
-# parser = argparse.ArgumentParser(description="Visualize entity locations in Wikipedia revision histories")
-# parser.add_argument("input_folder", default="arab_spring", help="folder with input data.")
-# parser.add_argument("language", default="nl", help="two/three letter language code, e.g. 'nl'.")
-# parser.add_argument("visualization_focus", default="entities", help="visualize focus can be 'entities' or 'location' based.")
-# parser.add_argument("visualization_type", default="single_month", help="visualizatioin or timelapse.")
-
-# args = parser.parse_args()
 
 def get_figure(event, language, method, duration):
 	print("event", event, "language", language, "method", method)
@@ -28,6 +19,8 @@ def get_figure(event, language, method, duration):
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server # the Flask app
+
 introduction = '''
 ### EventPlace map visualizations
 

@@ -3,7 +3,6 @@
 import json
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.io as pio
 import random
 import re
 
@@ -233,9 +232,8 @@ class Visualize:
         fig.update_layout(
             margin = {"l":0,"t":0,"b":0,"r":0},
             mapbox = {
-                "center": {"lon": 10, "lat": 10},
                 "style": "stamen-terrain",
-                "center": {"lon": -20, "lat": -20},
+                "center": {"lon": 15, "lat": 18},
                 "zoom": 1}
         )
         return fig
@@ -255,9 +253,8 @@ class Visualize:
         fig.update_layout(
             margin = {"l":0,"t":0,"b":0,"r":0},
             mapbox = {
-                "center": {"lon": 10, "lat": 10},
                 "style": "stamen-terrain",
-                "center": {"lon": -20, "lat": -20},
+                "center": {"lon": 15, "lat": 18},
                 "zoom": 1}
         )
         return fig

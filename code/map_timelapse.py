@@ -125,7 +125,7 @@ class Timelapse:
                         "showlegend": True,
                         "opacity": 0,
                         "marker": {
-                            "size": 0
+                            "size": 2
                         },
                     }
                 else:
