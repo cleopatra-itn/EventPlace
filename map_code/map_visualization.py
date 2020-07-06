@@ -1,5 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""
+
+
+
+"""
 import json
 import pandas as pd
 import plotly.graph_objects as go
@@ -8,10 +13,10 @@ import re
 
 class Visualize:
 
-    def __init__(self, event, language, method, visualize_month=False, show=False):
+    def __init__(self, event, language, focus, visualize_month=False, show=False):
         self.event = event
         self.language = language
-        self.focus = method
+        self.focus = focus
 
         if self.focus == "entities":
             self.types = [
@@ -20,7 +25,7 @@ class Visualize:
             ]
             self.entitiesDB = dict() 
 
-        with open("resources/%s/%s.json" % (self.event, self.language)) as f:
+        with open("plotting_data/%s/%s.json" % (self.event, self.language)) as f:
             self.input_data = json.load(f)
         
         self.data = dict()
@@ -63,7 +68,7 @@ class Visualize:
                         'geographical region': 'geographic region',
                         'district of libya': 'geographic region',
                         'province': 'geographic region',
-                        'website': 'organization', # Twitter, Facebook
+                        'website': 'organization',
                         'organisation': 'organization',
                         'nonprofit organization': 'organization',
                         'terrorist organisation': 'organization',

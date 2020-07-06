@@ -26,7 +26,9 @@ server = app.server # the Flask app
 introduction = '''
 ### EventPlace map visualizations
 
-Use the options to create animations of the development of a Wikipedia page.
+Use the options to create map visualizations of the entities related to an event.
+You can specify the month or create a timelapse for the entire event. 
+The visualizations are built using the revision histories of Wikipedia, and you can chose which language version you want to visualize.
 '''
     
 app.layout = html.Div([
@@ -37,6 +39,7 @@ app.layout = html.Div([
     	dcc.Dropdown(
     		id = "event",
         	options = [
+	            {'label': 'Choose event', 'value': 'a'},
 	            {'label': 'Arab Spring', 'value': 'arab_spring'},
 	            {'label': 'Refugee Crisis', 'value': 'refugee_crisis'},
 	            {'label': 'COVID-19', 'value': 'covid19'}
@@ -57,7 +60,7 @@ app.layout = html.Div([
         dcc.Dropdown(
         	id = "language",
 	        options = [
-	            {'label': 'Dutch', 'value': 'nl'},
+	            {'label': 'Datch', 'value': 'nl'},
 	            {'label': 'Italian', 'value': 'it'},
 	            {'label': 'German', 'value': 'de'}
 	        ],
@@ -72,10 +75,6 @@ app.layout = html.Div([
 	        value = 'timelapse'
 	    )
     ],style={'width': '48%', 'float': 'right', 'display': 'inline-block'}),
-
-    html.Div([
-        
-    ]),
 	
 	dcc.Graph(id = "visualization")
 ])
