@@ -129,7 +129,6 @@ class Visualize:
         }
 
         entities_in_data = sorted(list(month_data.keys()))
-        print(entities_in_data)
         coordinates = set()
         for entity in entities_in_data:
 
