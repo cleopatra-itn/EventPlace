@@ -38,7 +38,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server # the Flask app
 
 introduction = '''
-### EventPlace timelapse map visualizations
+### EntityPlace timelapse map visualizations
 
 Explore the Arab Spring through timelapse visualizations.
 
@@ -69,24 +69,9 @@ app.layout = html.Div([
 
 	dcc.Markdown(children=introduction), 
 
-	# html.Div([
- #        dcc.Dropdown(
-        	
-	#         ],
-	#         value = 'initial'
-	#     ),
- #    ], style={'width': '90%', 'display': 'inline-block'}),
-	
-
 	html.Div([
     	dcc.Dropdown(
-    		# id = "event",
-      #   	options = [
-	     #        {'label': 'Choose event', 'value': 'initial'},
-	     #        {'label': 'Arab Spring', 'value': 'arab_spring'},
-	     #        {'label': 'Refugee Crisis \[coming\]', 'value': 'refugee_crisis'},
-	     #        {'label': 'COVID-19 \[coming\]', 'value': 'covid19'}
-	        id = "language",
+ 	        id = "language",
 	        options = [
 	            {'label': 'Choose language', 'value': 'initial'},
 	            {'label': 'Dutch', 'value': 'nl'},
