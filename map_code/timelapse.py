@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 class Timelapse:
 
     def __init__(self, event, language, focus, visualize_month=False, show=False):
-        v = mv.Visualize(event, language, focus) #"arab_spring", "it", "entities")
+        v = mv.Visualize(event, language, focus)
         input_data = v.data
 
         self.months = list(input_data.keys())

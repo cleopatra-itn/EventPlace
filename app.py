@@ -4,8 +4,8 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import map_code.map_visualization as mv
-import map_code.map_timelapse as mt
+#import map_code.map_visualization as mv
+import map_code.timelapse as mt
 import os
 import pandas as pd
 import plotly.graph_objects as go
@@ -27,9 +27,6 @@ def get_figure(language, focus):
 				"zoom": 1}
 		)
 		return fig
-	#if duration == "single_month":
-	#	return mv.Visualize(event, language, focus, "2014_08", show=False).fig # 2014_08 | 2011_05
-	#else:
 	return mt.Timelapse("arab_spring", language, focus, show=False).fig
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
