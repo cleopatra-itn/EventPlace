@@ -18,18 +18,19 @@ class Visualize:
         self.language = language
         self.focus = focus
 
-        if self.focus == "entities":
+        if self.focus == "entity":
             self.types = [
-                'city', 'conflict', 'country', 'ethnic group', 'geographic region', 'human', 
-                'organization', 'referendum', 'religion', 'resolution', 'social movement', 'square'
+                'city', 'competition', 'conflict', 'country', 'crisis', 'cultural product', 'election', 'ethnic group', 'geographic region',
+                'historical period', 'human', 'language', 'mythical figure', 'organization', 'governmental initiative', 'referendum', 'religion', 
+                'resolution', 'social movement', 'square/park'
             ]
-            self.entitiesDB = dict() 
+            self.entitiesDB = dict()
 
         with open("plotting_data/%s/%s.json" % (self.event, self.language)) as f:
             self.input_data = json.load(f)
         
         self.data = dict()
-        for month in sorted(list(self.input_data.keys())): 
+        for month in sorted(list(self.input_data.keys())):
             if visualize_month:
                 if month != visualize_month: continue
             visualization_data = self._make_visualization_data(month)
@@ -39,8 +40,8 @@ class Visualize:
             if show == True:
                 self.fig.show()
 
-    def _get_color(self, entity_type): 
-        colors = [i for i in range(len(self.types))] 
+    def _get_color(self, entity, entity_type): 
+        colors = [i for i in range(len(self.types))]
         color_n = self.types.index(entity_type)
         color = colors[color_n]
         return(color)
@@ -60,6 +61,10 @@ class Visualize:
                         'civil disobedience': 'conflict',
                         'protest': 'conflict',
                         'war': 'conflict',
+                        'event': 'crisis',
+                        'film': 'cultural product',
+                        'tv series': 'cultural product',
+                        'festival': 'cultural product',
                         'continent': 'geographic region',
                         'county': 'geographic region',
                         'occupied territory': 'geographic region',
@@ -68,6 +73,10 @@ class Visualize:
                         'geographical region': 'geographic region',
                         'district of libya': 'geographic region',
                         'province': 'geographic region',
+                        'currency': 'governmental initiative',
+                        'nuclear program': 'governmental initiative',
+                        '----': 'governmental initiative',
+                        'mythical character': 'mythical figure',
                         'website': 'organization',
                         'organisation': 'organization',
                         'nonprofit organization': 'organization',
@@ -76,8 +85,11 @@ class Visualize:
                         'political party': 'organization',
                         'political union': 'organization',
                         'government agency': 'organization',
+                        'period of history': 'historical period',
                         'islamic denomination': 'religion',
-                        'united nations security council resolution': 'resolution'}
+                        'united nations security council resolution': 'resolution',
+                        'square': 'square/park',
+                        'park': 'square/park'}
         
         if entity_type in list(type_mapping.keys()):
             return type_mapping[entity_type]
@@ -92,38 +104,39 @@ class Visualize:
 
     def _make_visualization_data(self, month):
 
-        if self.focus == "locations":
+        if self.focus == "location":
             return self.locations_data(self.input_data[month])
             
-        if self.focus == "entities":
+        if self.focus == "entity":
             return self.entities_data(self.input_data[month])
 
     def _make_visualization(self, visualization_data, show):
 
-        if self.focus == "locations":
+        if self.focus == "location":
             return self.locations_visualization(visualization_data)
             
-        if self.focus == "entities":
+        if self.focus == "entity":
             return self.entities_visualization(visualization_data)
         
     def locations_data(self, month_data):
 
-        visualization_data = {"locations": dict(),
-                        "location_labels": [],
-                        "latitudes": [],
-                        "longitudes": [],
-                        "frequencies": []
-                        }
+        visualization_data = {
+            "locations": dict(),
+            "location_labels": [],
+            "latitudes": [],
+            "longitudes": [],
+            "frequencies": []
+        }
 
         entities_in_data = sorted(list(month_data.keys()))
-
+        print(entities_in_data)
         coordinates = set()
         for entity in entities_in_data:
 
             lat = float(month_data[entity]["latitude"])
             lon = float(month_data[entity]["longitude"])
-            location = month_data[entity]["location"]
-            frequency = month_data[entity]["frequencies"]
+            location = month_data[entity]["location"].capitalize()
+            frequency = month_data[entity]["frequency"]
 
             if (lat, lon) not in coordinates:
                 visualization_data["latitudes"].append(lat)
@@ -133,10 +146,21 @@ class Visualize:
 
                 coordinates.add((lat, lon))
 
-            visualization_data["locations"][location].add(entity)
-            indx = visualization_data["latitudes"].index(lat)
-            visualization_data["frequencies"][indx] += frequency
+            # some locations have the same coordinates (e.g. Saudi Arabia and Mashriq)
+            elif location not in visualization_data["locations"].keys():
+                bias = 0.01
+                visualization_data["latitudes"].append(lat+bias)
+                visualization_data["longitudes"].append(lon-bias)
+                visualization_data["frequencies"].append(frequency)
+                visualization_data["locations"][location] = set()
 
+                coordinates.add((lat, lon))
+
+            else:
+                indx = visualization_data["latitudes"].index(lat)
+                visualization_data["frequencies"][indx] += frequency
+            visualization_data["locations"][location].add(entity.capitalize())
+            
         # increase marker size
         for n,frequency in enumerate(visualization_data["frequencies"]):
             frequency += 8  
@@ -210,7 +234,7 @@ class Visualize:
 
             entity_type = self._check_entity_type(month_data[entity]["type"].lower())
             visualization_data["entity_types"].append(entity_type)
-            visualization_data["colors"].append(self._get_color(entity_type))
+            visualization_data["colors"].append(self._get_color(entity, entity_type))
 
         assert(
             len(visualization_data["latitudes"]) == 
@@ -235,7 +259,7 @@ class Visualize:
         ))
 
         fig.update_layout(
-            margin = {"l":0,"t":0,"b":0,"r":0},
+            margin = {"l":300,"t":0,"b":0,"r":300},
             mapbox = {
                 "style": "stamen-terrain",
                 "center": {"lon": 15, "lat": 18},
@@ -251,12 +275,13 @@ class Visualize:
             lat = visualization_data["latitudes"],
             text = visualization_data["location_labels"],
             marker = go.scattermapbox.Marker(
+                color = 1,
                 size = visualization_data["frequencies"]
             )
         ))
 
         fig.update_layout(
-            margin = {"l":0,"t":0,"b":0,"r":0},
+            margin = {"l":350,"t":0,"b":0,"r":350},
             mapbox = {
                 "style": "stamen-terrain",
                 "center": {"lon": 15, "lat": 18},

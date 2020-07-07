@@ -5,7 +5,7 @@
       "latitude": 17.0,
       "location": "Mali",
       "longitude": -4.0,
-      "type": "Event"
+      "type": "Crisis"
     },
     "2009 Iranian Presidential Election Protests": {
       "frequency": 2.6856275086613706,
@@ -6408,7 +6408,7 @@
       "latitude": 35.0,
       "location": "China",
       "longitude": 105.0,
-      "type": "----"
+      "type": "Governmental initiave"
     },
     "Iran": {
       "frequency": 0.39812738319515634,

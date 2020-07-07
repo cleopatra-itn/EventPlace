@@ -268,7 +268,7 @@
     },
     "Iraq": {
       "type": "Country",
-      "location": "iraq",
+      "location": "Iraq",
       "frequency": 0.7246292165881073,
       "longitude": "43.0",
       "latitude": "33.0"
@@ -998,7 +998,7 @@
     },
     "Iraq": {
       "type": "Country",
-      "location": "iraq",
+      "location": "Iraq",
       "frequency": 0.8058015469782364,
       "longitude": "43.0",
       "latitude": "33.0"
@@ -1350,7 +1350,7 @@
     },
     "Iran": {
       "type": "Country",
-      "location": "iran",
+      "location": "Iran",
       "frequency": 1.3513513513513513,
       "longitude": "53.0",
       "latitude": "32.0"
@@ -1364,7 +1364,7 @@
     },
     "Iraq": {
       "type": "Country",
-      "location": "iraq",
+      "location": "Iraq",
       "frequency": 0.7341310776425279,
       "longitude": "43.0",
       "latitude": "33.0"
