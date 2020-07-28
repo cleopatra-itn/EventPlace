@@ -74,6 +74,7 @@ class Visualize:
                         'district of libya': 'geographic region',
                         'province': 'geographic region',
                         'currency': 'governmental initiative',
+                        'governmental initiave': 'governmental initiative',
                         'nuclear program': 'governmental initiative',
                         '----': 'governmental initiative',
                         'mythical character': 'mythical figure',

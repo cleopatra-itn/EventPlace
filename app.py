@@ -57,7 +57,7 @@ You can download individual frames of the visualization, and you are welcome to 
 outro = ''' 
 The visualizations have been built using all open source data and software: Wikipedia, Wikidata, Plotly, Dash, Pandas, WikiRevParser, the Wikipedia API.
 
-Copyright (c) Sara Abdollahi and Anna Jørgensen. Contact a \[dot\] jorgensen \[at\] uva \[dot\] nl for issues and questions.
+Copyright (c) Sara Abdollahi and Anna Jørgensen. For issues and questions: a \[dot\] jorgensen \[at\] uva \[dot\] nl.
 
 This project has received funding from the European Union’s Horizon 2020 research and innovation programme under the Marie Skłodowska-Curie grant agreement No 812997.
 ''' 
@@ -72,9 +72,9 @@ app.layout = html.Div([
 	        options = [
 	            {'label': 'Choose language', 'value': 'initial'},
 	            {'label': 'Dutch', 'value': 'nl'},
-	            {'label': 'Italian', 'value': 'it'},
 	            {'label': 'German', 'value': 'de'},
-	            {'label': 'Greek', 'value': 'el'}
+	            {'label': 'Greek', 'value': 'el'},
+	            {'label': 'Italian', 'value': 'it'}
 	        ],
 	        value = 'initial'
 		),
