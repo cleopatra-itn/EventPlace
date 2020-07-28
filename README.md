@@ -43,4 +43,4 @@ This repository makes available:
 - [The Visualization Code](map_code/): Code for creating map visualizations using the data in plotting_data/ and the user selections.
 - [The Main Code](.): app.py runs the code in map_code/ to generate the visualizations.
 get_entities.py extracts entities from the revision histories extracted from Wikipedia and outputs the data in entity_data/.
-- [Additional Files](.): Procfile and requirements.txt are necessary for the app.py. README is this file.
+- Additional Files: Procfile and requirements.txt are necessary for the app.py. README is this file.
