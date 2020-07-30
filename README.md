@@ -4,8 +4,8 @@
 [https://entity-place.herokuapp.com/](https://entity-place.herokuapp.com/)
 
 ## Contributors
-- Anna Jørgensen (ESR13)
-- Sara Abdollahi (ESR2)
+- Anna Jørgensen (ESR13): data extraction and processing, [WikiRevParser](https://github.com/ajoer/WikiRevParser), [visualizations](https://github.com/ajoer/EntityPlace/tree/master/map_code), web development, [demonstrator](https://entity-place.herokuapp.com/) infrastructure and deployment, and documentation.
+- Sara Abdollahi (ESR2): location estimation
 
 ## Summary
 This README describes one of the demonstrators created during the Cleopatra project. The development of this demonstrator has been funded by the European Union’s Horizon 2020 research and innovation programme under the Marie Skłodowska-Curie grant agreement no. 812997.
